@@ -5,13 +5,9 @@
  */
 package ru.example.altarixtesttask.repository;
 
-import ru.example.altarixtesttask.model.Department;
 import ru.example.altarixtesttask.model.Employee;
 import java.util.List;
-import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -21,4 +17,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface EmployeeRepository  extends JpaRepository<Employee, Integer>{
     List<Employee> findByDepartmentId(Integer DepartmentId);
+    List<Employee> findByDepartmentIdAndChief(Integer DepartmentId, Boolean chief);
+    Integer countByDepartmentId(Integer DepartmentId);
 }

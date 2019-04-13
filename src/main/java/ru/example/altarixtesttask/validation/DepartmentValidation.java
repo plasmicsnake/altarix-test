@@ -24,4 +24,18 @@ public class DepartmentValidation {
             throw new ValidateException("Already has department with name " + d.getName());
         }
     }
+    
+    public static void hasSubdepartments(DepartmentRepository rep, Department dept) throws ValidateException{
+        List<Department> subDeparments = rep.findByParentDepartmentId(dept.getId());
+        if (subDeparments.size() > 0) {
+            throw new ValidateException("Depapartment with id " + dept.getId() + " has subdepartments");
+        }
+    }
+    
+    public static void hasEmployees(EmployeeRepository rep, Department dept) throws ValidateException{
+        List<Employee> employees = rep.findByDepartmentId(dept.getId());
+        if (employees.size() > 0) {
+            throw new ValidateException("Depapartment with id " + dept.getId() + " has employees");
+        }
+    }
 }
