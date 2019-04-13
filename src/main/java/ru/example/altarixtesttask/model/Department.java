@@ -6,8 +6,8 @@
 package ru.example.altarixtesttask.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.wordnik.swagger.annotations.ApiModel;
-import com.wordnik.swagger.annotations.ApiModelProperty;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -20,7 +20,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
-import org.hibernate.envers.Audited;
 import org.springframework.format.annotation.DateTimeFormat;
 
 /**
@@ -28,7 +27,6 @@ import org.springframework.format.annotation.DateTimeFormat;
  * @author Vladislav
  */
 @Entity
-@Audited
 @Table(name = "department")
 @ApiModel(description = "All details about the Department.")
 public class Department {
