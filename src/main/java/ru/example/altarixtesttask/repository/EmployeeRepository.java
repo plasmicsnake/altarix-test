@@ -19,4 +19,7 @@ public interface EmployeeRepository  extends JpaRepository<Employee, Integer>{
     List<Employee> findByDepartmentId(Integer DepartmentId);
     List<Employee> findByDepartmentIdAndChief(Integer DepartmentId, Boolean chief);
     Integer countByDepartmentId(Integer DepartmentId);
+    List<Employee> findBySurname(String surname);
+    List<Employee> findBySurnameAndName(String surname, String name);
+    List<Employee> findBySurnameAndNameAndPatronymic(String surname, String name, String patronymic);
 }

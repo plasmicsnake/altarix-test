@@ -5,22 +5,16 @@
  */
 package ru.example.altarixtesttask.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.format.annotation.DateTimeFormat;
 
 /**
@@ -28,9 +22,9 @@ import org.springframework.format.annotation.DateTimeFormat;
  * @author Vladislav
  */
 @Entity
-@Table(name = "department")
-@ApiModel(description = "All details about the Department.")
-public class Department {
+@Table(name = "department_audit")
+@ApiModel(description = "Department audit table.")
+public class DepartmentAudit {
 
     /**
      * @return the createdAt
@@ -47,19 +41,20 @@ public class Department {
     }
     
     @Id
-    @Column(name="department_id")
+    @Column(name="id")
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @ApiModelProperty(notes = "The database generated department ID")
+    @ApiModelProperty(notes = "The database generated ID")
     private Integer id;
     
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "parent_id")
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    @JsonIgnore
-    @ApiModelProperty(notes = "The parent department")
-    private Department parentDepartment;
+    @Column(name="department_id", nullable = false)
+    @ApiModelProperty(notes = "department ID")
+    private Integer departmentId;
     
-    @Column(name = "department_name", nullable = false, unique = true)
+    @JoinColumn(name = "parent_id")
+    @ApiModelProperty(notes = "The parent department ID")
+    private Integer parentDepartmentId;
+    
+    @Column(name = "department_name", nullable = false)
     @ApiModelProperty(notes = "Department name")
     private String name;
     
@@ -97,16 +92,30 @@ public class Department {
     }
 
     /**
-     * @return the parentDepartment
+     * @return the departmentId
      */
-    public Department getParentDepartment() {
-        return parentDepartment;
+    public Integer getDepartmentId() {
+        return departmentId;
     }
 
     /**
-     * @param parentDeparnment the parentDepartment to set
+     * @param departmentId the departmentId to set
      */
-    public void setParentDepartment(Department parentDeparnment) {
-        this.parentDepartment = parentDeparnment;
+    public void setDepartmentId(Integer departmentId) {
+        this.departmentId = departmentId;
+    }
+
+    /**
+     * @return the parentDepartmentId
+     */
+    public Integer getParentDepartmentId() {
+        return parentDepartmentId;
+    }
+
+    /**
+     * @param parentDepartmentId the parentDepartmentId to set
+     */
+    public void setParentDepartmentId(Integer parentDepartmentId) {
+        this.parentDepartmentId = parentDepartmentId;
     }
 }
