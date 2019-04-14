@@ -31,9 +31,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import ru.example.altarixtesttask.model.BalanceResult;
 import ru.example.altarixtesttask.model.DepartmentBalance;
 import ru.example.altarixtesttask.model.DepartmentChidrenTree;
 import ru.example.altarixtesttask.model.DepartmentInfo;
+import ru.example.altarixtesttask.model.DepartmentParentTree;
 
 /**
  *
@@ -165,6 +167,93 @@ public class CompanyController {
             return result;
     }
     
+    //D7 tested
+    @ApiOperation(value = "Move department to another department")
+    @ExceptionHandler({ResourceNotFoundException.class, ValidateException.class})
+    @PutMapping("/department/{deptId}/moveto/{newParentDeptId}")
+    public @ResponseBody Department moveDepartmentTo(
+            @ApiParam(value = "Subdeparment id", required = true) @PathVariable Integer deptId, 
+            @ApiParam(value = "New Parent Deparment id for this subdepartment", required = true) @PathVariable Integer newParentDeptId) {
+        DepartmentValidation.idNotEqualsParent(deptId, newParentDeptId);
+        return departmentRepository.findById(deptId).map(d -> {
+            d.setParentDepartment(departmentRepository.findById(newParentDeptId)
+                    .orElseThrow(() -> new ResourceNotFoundException("New parent department not found with id " + newParentDeptId)));
+            return departmentRepository.save(d);
+        }).orElseThrow(() -> new ResourceNotFoundException("Department not found with id " + deptId));
+    }
+    
+    //D8 -tested
+    @ApiOperation(value = "View a list of all parents of department")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Successfully retrieved list"),
+        @ApiResponse(code = 401, message = "You are not authorized to view the resource"),
+        @ApiResponse(code = 403, message = "Accessing the resource you were trying to reach is forbidden"),
+        @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")
+    })
+    @GetMapping("/departments/{deptId}/parents")
+    @ExceptionHandler({ResourceNotFoundException.class})
+    public @ResponseBody DepartmentParentTree getDepartmentParents(
+            @ApiParam(value = "Deparment id for view", required = true) @PathVariable Integer deptId) {
+        
+        Department department = departmentRepository.findById(deptId)
+                .orElseThrow(() -> new ResourceNotFoundException("Department not found with id " + deptId));
+        DepartmentParentTree result = grabParentDepartments(department);
+        return result;
+    }
+
+    //D9 - tested
+    @ApiOperation(value = "Find department by name")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Successfully retrieved list"),
+        @ApiResponse(code = 401, message = "You are not authorized to view the resource"),
+        @ApiResponse(code = 403, message = "Accessing the resource you were trying to reach is forbidden"),
+        @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")
+    })
+    @GetMapping("/departments/findbyname/{deptName}")
+    @ExceptionHandler({ResourceNotFoundException.class})
+    public @ResponseBody Department findDepartmentsByName(
+            @ApiParam(value = "Deparment name", required = true) @PathVariable String deptName) {
+        return  departmentRepository.findByName(deptName).orElseThrow(() -> new ResourceNotFoundException("Department not found with name " + deptName));
+    }
+
+    //D10 - tested
+    @ApiOperation(value = "Calculate department balance")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Successfully retrieved list"),
+        @ApiResponse(code = 401, message = "You are not authorized to view the resource"),
+        @ApiResponse(code = 403, message = "Accessing the resource you were trying to reach is forbidden"),
+        @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")
+    })
+    @GetMapping("/departments/{deptId}/balance")
+    @ExceptionHandler({ResourceNotFoundException.class})
+    public @ResponseBody BalanceResult getDepartmentBalance(
+            @ApiParam(value = "Deparment id", required = true) @PathVariable Integer deptId) {
+        BalanceResult result = new BalanceResult(departmentRepository.findById(deptId)
+                .orElseThrow(() -> new ResourceNotFoundException("Department not found with id " + deptId)));
+        List<Employee> empList = employeeRepository.findByDepartmentId(deptId);
+        result.setBalance(0);
+        empList.stream().forEach(emp -> {
+            result.setBalance(result.getBalance() + emp.getSalary());
+        });
+        return result;
+    }
+
+    //E1 - tested
+    @ApiOperation(value = "View a list of employees of department", response = Employee.class, responseContainer = "List")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Successfully retrieved list"),
+        @ApiResponse(code = 401, message = "You are not authorized to view the resource"),
+        @ApiResponse(code = 403, message = "Accessing the resource you were trying to reach is forbidden"),
+        @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")
+    })
+    @GetMapping("/department/{deptId}/employees")
+    @ExceptionHandler({ResourceNotFoundException.class})
+    public @ResponseBody List<Employee> employeeList(
+            @ApiParam(value = "Deparment id", required = true) @PathVariable Integer deptId) {
+        return employeeRepository.findByDepartmentId(departmentRepository.findById(deptId)
+                .orElseThrow(() -> new ResourceNotFoundException("Department not found with id " + deptId)).getId());
+    }
+    
     private List<DepartmentChidrenTree> grabSubdepartments(Department parent) {
         List<DepartmentChidrenTree> result = new ArrayList<>();
         departmentRepository.findByParentDepartmentId(parent.getId()).stream().forEach(dep -> {
@@ -184,6 +273,15 @@ public class CompanyController {
             subDepTree.setChildren(grabSubdepartmentsAll(sub));
             result.add(subDepTree);
         });
+        return result;
+    }
+    
+    private DepartmentParentTree grabParentDepartments(Department parent) {
+        DepartmentParentTree result = new DepartmentParentTree();
+        result.setDepartmentName(parent.getName());
+        if (parent.getParentDepartment() != null) {
+            result.setParent(grabParentDepartments(parent.getParentDepartment()));
+        }
         return result;
     }
 }

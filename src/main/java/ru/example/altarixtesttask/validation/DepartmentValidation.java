@@ -38,4 +38,10 @@ public class DepartmentValidation {
             throw new ValidateException("Depapartment with id " + dept.getId() + " has employees");
         }
     }
+    
+    public static void idNotEqualsParent(Integer deptId, Integer parentId) throws ValidateException{
+        if (deptId.equals(parentId)) {
+            throw new ValidateException("Parent department id equals current id");
+        }
+    }
 }
